@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>БЕЛ 8 клас – Интерактивен преговор</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Source+Serif+4:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1814;
+    --card: #201e1a;
+    --border: #2e2b25;
+    --gold: #c9a84c;
+    --gold-dim: #7a6330;
+    --cream: #e8dfc8;
+    --muted: #7a7060;
+    --accent-blue: #4a8fa8;
+    --accent-green: #5a8c6a;
+    --accent-red: #a84a4a;
+    --accent-purple: #7a5aa8;
+    --text: #d4c9b0;
+    --text-dim: #8a7d68;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 300;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 3.5rem 1rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, #c9a84c18 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.6rem;
+  }
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.1;
+  }
+  h1 span { color: var(--gold); }
+  .header-sub {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1.5rem auto;
+  }
+
+  /* ── NAV TABS ── */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15, 14, 12, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 1rem;
+  }
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    max-width: 900px;
+    margin: 0 auto;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    padding: 1rem 1.1rem;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s;
+    position: relative;
+  }
+  .nav-btn:hover { color: var(--cream); }
+  .nav-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* ── SECTIONS ── */
+  .section { display: none; animation: fadeIn 0.35s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--cream);
+    margin-bottom: 0.3rem;
+  }
+  .section-desc {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 1.8rem;
+    font-style: italic;
+  }
+
+  /* ── TOPIC CARDS ── */
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .topic-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .topic-card:hover {
+    border-color: var(--gold-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .topic-card-header {
+    padding: 1rem 1.2rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .topic-icon {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .topic-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--cream);
+    line-height: 1.3;
+  }
+  .topic-body {
+    padding: 1rem 1.2rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    display: none;
+  }
+  .topic-card.open .topic-body { display: block; }
+  .topic-card.open { border-color: var(--gold); }
+  .topic-card.open .topic-card-header { border-color: var(--gold-dim); }
+
+  /* Accent colors per section */
+  .lit-card .topic-card-header { border-left: 3px solid var(--accent-blue); }
+  .lang-card .topic-card-header { border-left: 3px solid var(--accent-green); }
+  .terms-card .topic-card-header { border-left: 3px solid var(--accent-purple); }
+
+  /* ── DEFINITION LIST ── */
+  .def-list { list-style: none; }
+  .def-item {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.83rem;
+  }
+  .def-item:last-child { border-bottom: none; }
+  .def-term {
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+  .def-desc { color: var(--text); margin-top: 0.15rem; }
+
+  /* ── WORKS TABLE ── */
+  .works-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-bottom: 1.5rem;
+  }
+  .works-table th {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+  .works-table td {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  .works-table tr:hover td { background: rgba(201,168,76,0.04); }
+  .era-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .era-ant { background: rgba(74,143,168,0.2); color: var(--accent-blue); }
+  .era-mid { background: rgba(168,74,74,0.2); color: #c07070; }
+  .era-ren { background: rgba(90,140,106,0.2); color: var(--accent-green); }
+
+  /* ── QUIZ ── */
+  .quiz-wrap { max-width: 640px; }
+  .quiz-progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    margin-bottom: 1.5rem;
+  }
+  .quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .quiz-q-num {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .quiz-question {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    color: var(--cream);
+    margin-bottom: 1.4rem;
+    line-height: 1.4;
+  }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+  .quiz-opt {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1.1rem;
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.88rem;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--gold-dim); color: var(--cream); }
+  .quiz-opt.correct { background: rgba(90,140,106,0.15); border-color: var(--accent-green); color: #8fc89f; }
+  .quiz-opt.wrong { background: rgba(168,74,74,0.15); border-color: var(--accent-red); color: #c07070; }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-feedback {
+    font-size: 0.82rem;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.2rem;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.ok { background: rgba(90,140,106,0.12); color: #8fc89f; border: 1px solid rgba(90,140,106,0.3); }
+  .quiz-feedback.fail { background: rgba(168,74,74,0.12); color: #c07070; border: 1px solid rgba(168,74,74,0.3); }
+  .quiz-next-btn {
+    background: none;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.85rem;
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.2s;
+    display: none;
+  }
+  .quiz-next-btn.show { display: inline-block; }
+  .quiz-next-btn:hover { background: rgba(201,168,76,0.1); }
+  .quiz-score-wrap {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    display: none;
+  }
+  .quiz-score-wrap.show { display: block; }
+  .quiz-score-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .quiz-score-label { font-size: 0.85rem; color: var(--muted); margin-top: 0.5rem; }
+  .quiz-restart-btn {
+    margin-top: 1.5rem;
+    background: var(--gold);
+    border: none;
+    color: var(--bg);
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.88rem;
+    padding: 0.7rem 2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FLASHCARDS ── */
+  .flashcard-wrap { max-width: 500px; margin: 0 auto; perspective: 1200px; }
+  .flashcard {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+    margin-bottom: 1.2rem;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .fc-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .fc-front {
+    background: var(--card);
+    border: 1px solid var(--border);
+  }
+  .fc-back {
+    background: linear-gradient(135deg, #1a1a14, #1e1c10);
+    border: 1px solid var(--gold-dim);
+    transform: rotateY(180deg);
+  }
+  .fc-hint { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .fc-term {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: var(--cream);
+  }
+  .fc-def { font-size: 0.85rem; color: var(--text); line-height: 1.6; }
+  .fc-controls { display: flex; gap: 1rem; justify-content: center; align-items: center; }
+  .fc-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Source Serif 4', serif;
+    font-size: 0.82rem;
+    padding: 0.5rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .fc-btn:hover { border-color: var(--gold-dim); color: var(--cream); }
+  .fc-counter { font-size: 0.8rem; color: var(--muted); min-width: 60px; text-align: center; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 540px) {
+    .topic-grid { grid-template-columns: 1fr; }
+    .works-table { font-size: 0.76rem; }
+    .works-table th, .works-table td { padding: 0.5rem 0.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">Министерство на образованието и науката</div>
+  <h1>БЕЛ — <span>8. клас</span></h1>
+  <p class="header-sub">Интерактивен преговор · Литература &amp; Български език</p>
+  <div class="divider"></div>
+</header>
+
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <button class="nav-btn active" onclick="showSection('lit')">📜 Литература</button>
+    <button class="nav-btn" onclick="showSection('lang')">🔤 Езикознание</button>
+    <button class="nav-btn" onclick="showSection('terms')">📖 Термини</button>
+    <button class="nav-btn" onclick="showSection('quiz')">✏️ Тест</button>
+    <button class="nav-btn" onclick="showSection('flash')">🃏 Флашкарти</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ══════════════════════════════════════════════
+       РАЗДЕЛ 1 – ЛИТЕРАТУРА
+  ═══════════════════════════════════════════════ -->
+  <div id="lit" class="section active">
+    <h2 class="section-title">Литература</h2>
+    <p class="section-desc">Три културни епохи: Античност · Средновековие · Ренесанс. Кликни върху творба за подробности.</p>
+
+    <!-- ВСИЧКИ ТВОРБИ – обзорна таблица -->
+    <table class="works-table">
+      <thead>
+        <tr>
+          <th>Творба</th><th>Автор</th><th>Жанр</th><th>Епоха</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Митове за Прометей, Едип; Троянски цикъл</td><td>Старогръцка митология</td><td>Митология</td><td><span class="era-badge era-ant">Античност</span></td></tr>
+        <tr><td>„Илиада" (I, VI, XXII, XXIV песен)</td><td>Омир</td><td>Епос</td><td><span class="era-badge era-ant">Античност</span></td></tr>
+        <tr><td>„Любов"</td><td>Сафо</td><td>Лирика</td><td><span class="era-badge era-ant">Античност</span></td></tr>
+        <tr><td>„Антигона"</td><td>Софокъл</td><td>Трагедия</td><td><span class="era-badge era-ant">Античност</span></td></tr>
+        <tr><td>Библия (Битие, Евангелие от Матей и Йоан)</td><td>—</td><td>Религиозен текст</td><td><span class="era-badge era-mid">Средновековие</span></td></tr>
+        <tr><td>„Пространно житие на Константин–Кирил"</td><td>Климент Охридски</td><td>Житие / Агиография</td><td><span class="era-badge era-mid">Средновековие</span></td></tr>
+        <tr><td>„Азбучна молитва"</td><td>Константин Преславски</td><td>Акростих / Молитва</td><td><span class="era-badge era-mid">Средновековие</span></td></tr>
+        <tr><td>„За буквите"</td><td>Черноризец Храбър</td><td>Полемично слово / Апология</td><td><span class="era-badge era-mid">Средновековие</span></td></tr>
+        <tr><td>„Притчата за трите пръстена" (Декамерон)</td><td>Джовани Бокачо</td><td>Новела</td><td><span class="era-badge era-ren">Ренесанс</span></td></tr>
+        <tr><td>„Дон Кихот" (I и VIII глава)</td><td>Мигел де Сервантес</td><td>Роман / Пародия</td><td><span class="era-badge era-ren">Ренесанс</span></td></tr>
+        <tr><td>„Хамлет"</td><td>Уилям Шекспир</td><td>Трагедия</td><td><span class="era-badge era-ren">Ренесанс</span></td></tr>
+        <tr><td>Сонет 91 и Сонет 130</td><td>Уилям Шекспир</td><td>Сонет</td><td><span class="era-badge era-ren">Ренесанс</span></td></tr>
+      </tbody>
+    </table>
+
+    <!-- КАРТИ ПО ЕПОХИ -->
+    <h3 style="font-family:'Playfair Display',serif;color:var(--accent-blue);font-size:1rem;margin-bottom:1rem;letter-spacing:0.05em;">⚡ АНТИЧНОСТ</h3>
+    <div class="topic-grid" style="margin-bottom:2rem;">
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">⚔️</span><span class="topic-title">Митове (Прометей, Едип, Троянски цикъл)</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Прометей</span><span class="def-desc"> – открадва огъня от боговете и го дава на хората; наказан – прикован към скала.</span></li>
+            <li class="def-item"><span class="def-term">Едип</span><span class="def-desc"> – убива баща си и се жени за майка си, без да знае; символ на слепотата на човека спрямо съдбата.</span></li>
+            <li class="def-item"><span class="def-term">Троянски цикъл</span><span class="def-desc"> – митове около Троянската война: Парис, Елена, 10-годишната обсада, Ахилес, Хектор.</span></li>
+            <li class="def-item"><span class="def-term">Митология</span><span class="def-desc"> – съвкупност от митове на даден народ.</span></li>
+            <li class="def-item"><span class="def-term">Митологичен цикъл</span><span class="def-desc"> – група митове с общи герои и теми.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🏛️</span><span class="topic-title">„Илиада" – Омир</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – героичен епос; изучават се I (гнявът на Ахил), VI (Хектор и Андромаха), XXII (смъртта на Хектор), XXIV (изкуплението).</span></li>
+            <li class="def-item"><span class="def-term">Главен конфликт</span><span class="def-desc"> – гневът на Ахил срещу Агамемнон → смъртта на Патрокъл → отмъщение → помирение с Приам.</span></li>
+            <li class="def-item"><span class="def-term">Постоянен епитет</span><span class="def-desc"> – устойчив израз, свързан с герой: „бързоногият Ахил", „розовопръстата зора".</span></li>
+            <li class="def-item"><span class="def-term">Епическо сравнение</span><span class="def-desc"> – разгърнато сравнение, което само по себе си рисува картина: „като лъв, що нападнал стадо..."</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">💛</span><span class="topic-title">„Любов" – Сафо</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – лирика; стихотворение за физическото и емоционалното въздействие на любовта.</span></li>
+            <li class="def-item"><span class="def-term">Тема</span><span class="def-desc"> – ревността и страстта; субективното преживяване е изразено чрез телесни симптоми (треска, шум в ушите).</span></li>
+            <li class="def-item"><span class="def-term">Лирика</span><span class="def-desc"> – литературен род, в центъра е чувството на лирическия аз.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🎭</span><span class="topic-title">„Антигона" – Софокъл</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – трагедия.</span></li>
+            <li class="def-item"><span class="def-term">Конфликт</span><span class="def-desc"> – Антигона иска да погребе брат си Полиник (Божи закон) ↔ Креон забранява (държавен закон).</span></li>
+            <li class="def-item"><span class="def-term">Трагически герой</span><span class="def-desc"> – благороден герой с фатален недостатък, унищожен от собствения си избор.</span></li>
+            <li class="def-item"><span class="def-term">Катарзис</span><span class="def-desc"> – очистване на зрителя от страх и съжаление чрез трагедията.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Playfair Display',serif;color:#c07070;font-size:1rem;margin-bottom:1rem;letter-spacing:0.05em;">✝ СРЕДНОВЕКОВИЕ</h3>
+    <div class="topic-grid" style="margin-bottom:2rem;">
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid #c07070;">
+        <div class="topic-card-header"><span class="topic-icon">📜</span><span class="topic-title">Библия</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Структура</span><span class="def-desc"> – Стар завет (39 книги) + Нов завет (27 книги).</span></li>
+            <li class="def-item"><span class="def-term">Грехопадение</span><span class="def-desc"> – Адам и Ева изяждат забранения плод; изгонени от Рая.</span></li>
+            <li class="def-item"><span class="def-term">Каин и Авел</span><span class="def-desc"> – първото братоубийство; символ на завистта и греха.</span></li>
+            <li class="def-item"><span class="def-term">Евангелие от Матей / Йоан</span><span class="def-desc"> – живота и учението на Исус.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid #c07070;">
+        <div class="topic-card-header"><span class="topic-icon">✍️</span><span class="topic-title">„Пространно житие на Константин–Кирил"</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Автор</span><span class="def-desc"> – Климент Охридски (по-вероятен) или Методий.</span></li>
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – пространно житие (агиография) – подробна биография на светец.</span></li>
+            <li class="def-item"><span class="def-term">Основни теми</span><span class="def-desc"> – детската мъдрост на Кирил; мисията при хазарите и моравците; създаването на азбуката.</span></li>
+            <li class="def-item"><span class="def-term">Символ</span><span class="def-desc"> – знак с по-дълбок смисъл: орелът в съня на Кирил символизира бъдещото му величие.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid #c07070;">
+        <div class="topic-card-header"><span class="topic-icon">🔤</span><span class="topic-title">„Азбучна молитва" – К. Преславски</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – молитва с форма на акростих.</span></li>
+            <li class="def-item"><span class="def-term">Акростих</span><span class="def-desc"> – поетична форма, при която началните букви на редовете образуват дума/азбука.</span></li>
+            <li class="def-item"><span class="def-term">Значение</span><span class="def-desc"> – прославя Кирило-Методиевото дело; защитава правото на богослужение на роден език.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid #c07070;">
+        <div class="topic-card-header"><span class="topic-icon">⚖️</span><span class="topic-title">„За буквите" – Черноризец Храбър</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – полемично слово (апология) – защита на нещо срещу критика.</span></li>
+            <li class="def-item"><span class="def-term">Основна теза</span><span class="def-desc"> – Глаголицата е по-съвършена от гръцката азбука, защото е създадена специално за славяните от свят мъж.</span></li>
+            <li class="def-item"><span class="def-term">Аргументи</span><span class="def-desc"> – гърците са приели азбуката постепенно от езичници; славяните получили своята изведнъж и от Бога.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-family:'Playfair Display',serif;color:var(--accent-green);font-size:1rem;margin-bottom:1rem;letter-spacing:0.05em;">🌅 РЕНЕСАНС</h3>
+    <div class="topic-grid">
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid var(--accent-green);">
+        <div class="topic-card-header"><span class="topic-icon">💍</span><span class="topic-title">„Притчата за трите пръстена" – Бокачо</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Контекст</span><span class="def-desc"> – Ден I, Новела III от „Декамерон".</span></li>
+            <li class="def-item"><span class="def-term">Сюжет</span><span class="def-desc"> – Мелхиседек разказва на Саладин притча: баща прави 3 копия на пръстен и дава по едно на всеки от 3-та си сина → никой не знае кой е истинският.</span></li>
+            <li class="def-item"><span class="def-term">Идея</span><span class="def-desc"> – религиозна търпимост; никоя от трите монотеистични религии не може да докаже, че е единствено вярна.</span></li>
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – новела – кратък прозаичен разказ с остър обрат.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid var(--accent-green);">
+        <div class="topic-card-header"><span class="topic-icon">🌬️</span><span class="topic-title">„Дон Кихот" – Сервантес</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Изучавани глави</span><span class="def-desc"> – I (Дон Кихот решава да стане рицар) и VIII (борбата с вятърните мелници).</span></li>
+            <li class="def-item"><span class="def-term">Пародия</span><span class="def-desc"> – комично подражание, което осмива рицарските романи; Дон Кихот вижда мелниците като великани.</span></li>
+            <li class="def-item"><span class="def-term">Роман</span><span class="def-desc"> – жанр с разгърнат сюжет, множество герои и подробна психологическа характеристика.</span></li>
+            <li class="def-item"><span class="def-term">Идея</span><span class="def-desc"> – противопоставяне на идеализма (Дон Кихот) и реализма (Санчо Панса); критика на мечтателството.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid var(--accent-green);">
+        <div class="topic-card-header"><span class="topic-icon">💀</span><span class="topic-title">„Хамлет" – Шекспир</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Жанр</span><span class="def-desc"> – трагедия в пет акта.</span></li>
+            <li class="def-item"><span class="def-term">Конфликт</span><span class="def-desc"> – Хамлет узнава, че чичо му Клавдий е убил баща му → вътрешна борба дали да отмъсти.</span></li>
+            <li class="def-item"><span class="def-term">Централен монолог</span><span class="def-desc"> – „Да бъдеш или да не бъдеш" – философска дилема за смисъла на живота и страданието.</span></li>
+            <li class="def-item"><span class="def-term">Ренесансов хуманизъм</span><span class="def-desc"> – Хамлет е образован, мислещ; трагедията му идва от невъзможността да действа по идеала.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lit-card" onclick="toggleCard(this)" style="border-left:3px solid var(--accent-green);">
+        <div class="topic-card-header"><span class="topic-icon">🌙</span><span class="topic-title">Сонети на Шекспир (91 и 130)</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Сонет</span><span class="def-desc"> – 14 стиха; 3 катрена + куплет; рима abab cdcd efef gg.</span></li>
+            <li class="def-item"><span class="def-term">Сонет 91</span><span class="def-desc"> – „Един се хвали с ловкост и успехи..." – любовта надминава всяко богатство и слава.</span></li>
+            <li class="def-item"><span class="def-term">Сонет 130</span><span class="def-desc"> – „Очите ѝ не са звезди..." – антипетраркистки сонет; любимата е описана реалистично, не идеализирано.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Комуникативни компетентности -->
+    <h3 style="font-family:'Playfair Display',serif;color:var(--gold);font-size:1rem;margin:2rem 0 1rem;letter-spacing:0.05em;">📝 ЕСЕ – Комуникативни компетентности</h3>
+    <div class="topic-card lit-card" onclick="toggleCard(this)" style="max-width:560px;">
+      <div class="topic-card-header"><span class="topic-icon">✍️</span><span class="topic-title">Есе по морален проблем</span></div>
+      <div class="topic-body">
+        <ul class="def-list">
+          <li class="def-item"><span class="def-term">Структура</span><span class="def-desc"> – Увод (теза) → Изложение (аргументи + примери от текста) → Заключение (извод).</span></li>
+          <li class="def-item"><span class="def-term">Морален проблем</span><span class="def-desc"> – дилема, свързана с ценности: дълг срещу чувство, правда срещу закон, свобода срещу послушание.</span></li>
+          <li class="def-item"><span class="def-term">Стил</span><span class="def-desc"> – книжовен; ясна авторска позиция; аргументация с позовавания на творбата.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       РАЗДЕЛ 2 – ЕЗИКОЗНАНИЕ
+  ═══════════════════════════════════════════════ -->
+  <div id="lang" class="section">
+    <h2 class="section-title">Български език</h2>
+    <p class="section-desc">Книжовен език · Стилове · Лексика · Морфология · Синтаксис · Комуникация</p>
+
+    <div class="topic-grid">
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🏛️</span><span class="topic-title">Книжовен език и норма</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Книжовен език</span><span class="def-desc"> – нормирана, кодифицирана форма на езика, използвана в образованието, медиите, официалното общуване.</span></li>
+            <li class="def-item"><span class="def-term">Езикова норма</span><span class="def-desc"> – задължителните правила за правопис, граматика, произношение и употреба.</span></li>
+            <li class="def-item"><span class="def-term">Кодификация</span><span class="def-desc"> – записване и фиксиране на нормата в речници, правописни наръчници и граматики.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🎨</span><span class="topic-title">Функционални стилове</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Разговорен</span><span class="def-desc"> – неофициално общуване; фразеологизми, диалектни думи, нарушения на нормата.</span></li>
+            <li class="def-item"><span class="def-term">Художествен</span><span class="def-desc"> – литературни текстове; богат образен език, тропи и фигури, индивидуален изказ.</span></li>
+            <li class="def-item"><span class="def-term">Научен</span><span class="def-desc"> – точност, термини, безличен изказ, аргументи и доказателства.</span></li>
+            <li class="def-item"><span class="def-term">Публицистичен</span><span class="def-desc"> – вестници, медии; въздействие + информация.</span></li>
+            <li class="def-item"><span class="def-term">Официално-делови</span><span class="def-desc"> – документи, закони, официална кореспонденция; стандартизиран, безличен.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">📚</span><span class="topic-title">Лексика и фразеология</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Лексикална съчетаемост</span><span class="def-desc"> – думите се употребяват с определени партньори: „правя грешка" (не „вземам грешка").</span></li>
+            <li class="def-item"><span class="def-term">Фразеологизъм</span><span class="def-desc"> – устойчива група думи с преносно значение, различно от буквалното: „хвърлям камък в чуждата градина".</span></li>
+            <li class="def-item"><span class="def-term">Свободно словосъчетание</span><span class="def-desc"> – думите запазват отделното си значение: „хвърлям топка".</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🔧</span><span class="topic-title">Залог на глагола</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Деятелен залог</span><span class="def-desc"> – подлогът извършва действието: „Мария пише писмо."</span></li>
+            <li class="def-item"><span class="def-term">Страдателен залог</span><span class="def-desc"> – подлогът е обект на действие: „Писмото беше написано от Мария."</span></li>
+            <li class="def-item"><span class="def-term">Образуване</span><span class="def-desc"> – „се" + глагол (аналитична форма) или „съм/бъда + минало страд. причастие".</span></li>
+            <li class="def-item"><span class="def-term">Преходни глаголи</span><span class="def-desc"> – само те имат форми за страдателен залог (имат пряко допълнение).</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">⏱️</span><span class="topic-title">Вид и време на глагола</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Свършен вид</span><span class="def-desc"> – действието е завършено, ограничено: „напиша, дойда, прочета".</span></li>
+            <li class="def-item"><span class="def-term">Несвършен вид</span><span class="def-desc"> – действието е в процес или повтарящо се: „пиша, идвам, чета".</span></li>
+            <li class="def-item"><span class="def-term">Видо-времеви форми</span><span class="def-desc"> – съчетанието на вид и граматично време определя значението: несв.вид + минало несв. = обичайно/продължително действие в миналото.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🔗</span><span class="topic-title">Сложни съставни изречения</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Подчинено допълнително</span><span class="def-desc"> – „Знам, <em>че ще дойде</em>." (отговаря на „какво?")</span></li>
+            <li class="def-item"><span class="def-term">Подчинено определително</span><span class="def-desc"> – „Книгата, <em>която прочетох</em>, беше интересна." (отговаря на „какъв?/кой?")</span></li>
+            <li class="def-item"><span class="def-term">Подчинено обстоятелствено</span><span class="def-desc"> – „Отидох, <em>защото ме покани</em>." (причина, цел, условие, отстъпка, начин…)</span></li>
+            <li class="def-item"><span class="def-term">Пунктуация</span><span class="def-desc"> – пред подчинените изречения обикновено се поставя запетая, освен при вметнато „че".</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">🗣️</span><span class="topic-title">Публично изказване и есе</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Публично изказване</span><span class="def-desc"> – устна реч пред аудитория; ясна теза, аргументи, въздействие.</span></li>
+            <li class="def-item"><span class="def-term">Есе</span><span class="def-desc"> – кратък аргументативен текст; изразява личен поглед по проблем с позовавания на литературен текст.</span></li>
+            <li class="def-item"><span class="def-term">Електронно писмо</span><span class="def-desc"> – официален или неофициален имейл; тема, поздрав, съдържание, подпис; спазване на регистъра.</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topic-card lang-card" onclick="toggleCard(this)">
+        <div class="topic-card-header"><span class="topic-icon">📱</span><span class="topic-title">Речев етикет в електронното общуване</span></div>
+        <div class="topic-body">
+          <ul class="def-list">
+            <li class="def-item"><span class="def-term">Регистър</span><span class="def-desc"> – официален (до учители, институции) или неофициален (до приятели).</span></li>
+            <li class="def-item"><span class="def-term">Особености</span><span class="def-desc"> – кратко, ясно съдържание; тема в Subject полето; правилен правопис.</span></li>
+            <li class="def-item"><span class="def-term">Грешки</span><span class="def-desc"> – смесване на регистри, липса на поздрав/подпис, жаргон в официален текст.</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       РАЗДЕЛ 3 – ТЕРМИНИ
+  ═══════════════════════════════════════════════ -->
+  <div id="terms" class="section">
+    <h2 class="section-title">Речник на термините</h2>
+    <p class="section-desc">Всички нови понятия от учебната програма на МОН за 8. клас.</p>
+
+    <div class="topic-grid">
+      <div style="grid-column: 1/-1;">
+        <table class="works-table">
+          <thead><tr><th>Термин</th><th>Определение</th><th>Раздел</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Митология</strong></td><td>Съвкупност от митовете на даден народ.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Митологичен цикъл</strong></td><td>Група свързани митове с общи герои и теми.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Епос</strong></td><td>Литературен род; повествование за герои и събития; обективно.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Постоянен епитет</strong></td><td>Устойчив образен израз, свързан с герой: „бързоногият Ахил".</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Епическо сравнение</strong></td><td>Разгърнато сравнение, образуващо самостоятелна картина.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Лирика</strong></td><td>Литературен род; субективно изразяване на чувства.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Драма</strong></td><td>Литературен род; произведение за сцена в диалогична форма.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Трагедия</strong></td><td>Драматичен жанр; водещ герой загива в конфликт с неизбежна сила.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Трагически конфликт</strong></td><td>Непримиримо противоречие, което унищожава героя.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Трагически герой</strong></td><td>Благороден, но с фатален недостатък герой.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Катарзис</strong></td><td>Очистване на зрителя от страх и съжаление.</td><td><span class="era-badge era-ant">Лит.</span></td></tr>
+            <tr><td><strong>Библия</strong></td><td>Свещена книга на юдаизма и християнството; Стар + Нов завет.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Агиография</strong></td><td>Жанр – биография на светец; „жития" = агиографски текстове.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Житие (пространно)</strong></td><td>Подробна биография на светец с чудеса и духовни добродетели.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Символ</strong></td><td>Знак с допълнително дълбоко значение.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Акростих</strong></td><td>Начални букви на редовете образуват дума или азбука.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Полемично слово</strong></td><td>Текст, насочен срещу опонент с контра-аргументи.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Апология</strong></td><td>Защита и оправдание на идея, личност или дело.</td><td><span class="era-badge era-mid">Лит.</span></td></tr>
+            <tr><td><strong>Новела</strong></td><td>Кратка проза с рязък обрат; герои в необичайни ситуации.</td><td><span class="era-badge era-ren">Лит.</span></td></tr>
+            <tr><td><strong>Роман</strong></td><td>Голям прозаичен жанр; разгърнат сюжет, много герои.</td><td><span class="era-badge era-ren">Лит.</span></td></tr>
+            <tr><td><strong>Пародия</strong></td><td>Комично подражание, осмиващо жанрови клишета.</td><td><span class="era-badge era-ren">Лит.</span></td></tr>
+            <tr><td><strong>Сонет</strong></td><td>14-стишие; 3 катрена + 1 куплет; рима abab cdcd efef gg.</td><td><span class="era-badge era-ren">Лит.</span></td></tr>
+            <tr><td><strong>Книжовен език</strong></td><td>Нормирана, кодифицирана форма на езика.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Езикова норма</strong></td><td>Задължителни правила за правилна употреба на езика.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Кодификация</strong></td><td>Записване на нормата в речници и наръчници.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Функционален стил</strong></td><td>Вид на книжовния език, определен от сферата на употреба.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Фразеологизъм</strong></td><td>Устойчиво словосъчетание с преносно значение.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Залог (деятелен)</strong></td><td>Подлогът извършва действието.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Залог (страдателен)</strong></td><td>Подлогът е обект на действието.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Свършен вид</strong></td><td>Глагол, изразяващ завършено действие.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+            <tr><td><strong>Несвършен вид</strong></td><td>Глагол, изразяващ продължително или повтарящо се действие.</td><td><span class="era-badge" style="background:rgba(90,140,106,0.2);color:#8fc89f;">Ез.</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       РАЗДЕЛ 4 – ТЕСТ
+  ═══════════════════════════════════════════════ -->
+  <div id="quiz" class="section">
+    <h2 class="section-title">Тест за самопроверка</h2>
+    <p class="section-desc">20 въпроса от цялата програма · Получаваш обратна връзка след всеки отговор.</p>
+    <div class="quiz-wrap">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="qProgress" style="width:0%"></div></div>
+      <div id="quizMain">
+        <div class="quiz-q-num" id="qNum"></div>
+        <div class="quiz-question" id="qText"></div>
+        <div class="quiz-options" id="qOpts"></div>
+        <div class="quiz-feedback" id="qFeedback"></div>
+        <button class="quiz-next-btn" id="qNext" onclick="nextQ()">Следващ въпрос →</button>
+      </div>
+      <div class="quiz-score-wrap" id="quizScore">
+        <div class="quiz-score-big" id="scoreBig"></div>
+        <div class="quiz-score-label" id="scoreLabel"></div>
+        <button class="quiz-restart-btn" onclick="restartQuiz()">Опитай отново</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       РАЗДЕЛ 5 – ФЛАШКАРТИ
+  ═══════════════════════════════════════════════ -->
+  <div id="flash" class="section">
+    <h2 class="section-title">Флашкарти</h2>
+    <p class="section-desc">Кликни върху картата, за да видиш определението. Навигирай с бутоните.</p>
+    <div class="flashcard-wrap">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="fc-face fc-front">
+          <div class="fc-hint">Термин</div>
+          <div class="fc-term" id="fcTerm"></div>
+        </div>
+        <div class="fc-face fc-back">
+          <div class="fc-hint">Определение</div>
+          <div class="fc-def" id="fcDef"></div>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="fc-btn" onclick="prevCard()">← Назад</button>
+        <span class="fc-counter" id="fcCounter"></span>
+        <button class="fc-btn" onclick="nextCard()">Напред →</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ── NAV ──
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── TOPIC CARDS ──
+function toggleCard(el) {
+  const wasOpen = el.classList.contains('open');
+  // close siblings in same grid
+  el.closest('.topic-grid') && el.closest('.topic-grid').querySelectorAll('.topic-card').forEach(c => c.classList.remove('open'));
+  if (!wasOpen) el.classList.add('open');
+}
+
+// ── QUIZ DATA ──
+const quizData = [
+  { q:'Кой е авторът на „Илиада"?', opts:['Омир','Сафо','Хезиод','Вергилий'], a:0 },
+  { q:'Какъв жанр е „Антигона" на Софокъл?', opts:['Комедия','Трагедия','Епос','Новела'], a:1 },
+  { q:'Какво е „катарзис"?', opts:['Вид сравнение','Очистване от страх и съжаление','Трагически герой','Акростих'], a:1 },
+  { q:'Кой е автор на „За буквите"?', opts:['Климент Охридски','Константин Преславски','Черноризец Храбър','Кирил'], a:2 },
+  { q:'Акростих е поетична форма, при която...', opts:['думите се римуват','началните букви на редовете образуват дума','стиховете са 14','няма рима'], a:1 },
+  { q:'„Притчата за трите пръстена" е от кой сборник?', opts:['Хамлет','Декамерон','Дон Кихот','Илиада'], a:1 },
+  { q:'Какво изразява страдателният залог?', opts:['Подлогът извършва действието','Подлогът е обект на действието','Действието е завършено','Действието е продължително'], a:1 },
+  { q:'„Прочетох книгата" – глаголът е в...', opts:['несвършен вид','страдателен залог','свършен вид','сегашно време'], a:2 },
+  { q:'Кой стил използва термини и безличен изказ?', opts:['Разговорен','Художествен','Научен','Публицистичен'], a:2 },
+  { q:'Сонетът се състои от колко стиха?', opts:['10','12','14','16'], a:2 },
+  { q:'„Хамлет" е произведение на...', opts:['Сервантес','Бокачо','Шекспир','Данте'], a:2 },
+  { q:'Какъв жанр е „Пространно житие на Константин–Кирил"?', opts:['Новела','Трагедия','Агиография / Житие','Роман'], a:2 },
+  { q:'Постоянният епитет е характерен за...', opts:['Сонетите на Шекспир','„Илиада" на Омир','„Антигона" на Софокъл','„За буквите"'], a:1 },
+  { q:'Фразеологизмът се различава от свободното словосъчетание по това, че...', opts:['е по-кратко','думите му са с преносно значение като цяло','е неологизъм','е заемка'], a:1 },
+  { q:'„Дон Кихот" принадлежи към епохата на...', opts:['Античността','Средновековието','Ренесанса','Просвещението'], a:2 },
+  { q:'Каква е основната тема на Сонет 130 на Шекспир?', opts:['Смъртта','Реалистично описание на любимата, без идеализация','Войната','Религията'], a:1 },
+  { q:'Кодификацията на езика означава...', opts:['Превод на текст','Записване на нормата в речници и наръчници','Създаване на диалект','Стилно разнообразие'], a:1 },
+  { q:'Подчиненото допълнително изречение отговаря на въпроса...', opts:['Кога?','Какво? / Кого?','Какъв?','Защо?'], a:1 },
+  { q:'Религиозната търпимост е централна тема в...', opts:['„Илиада"','„Антигона"','„Притчата за трите пръстена"','„Хамлет"'], a:2 },
+  { q:'„Азбучна молитва" е написана от...', opts:['Климент Охридски','Черноризец Храбър','Константин Преславски','Йоан Екзарх'], a:2 },
+];
+
+let qIdx = 0, score = 0, answered = false;
+
+function renderQ() {
+  const q = quizData[qIdx];
+  document.getElementById('qNum').textContent = `Въпрос ${qIdx+1} от ${quizData.length}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qProgress').style.width = ((qIdx/quizData.length)*100)+'%';
+  const opts = document.getElementById('qOpts');
+  opts.innerHTML = '';
+  q.opts.forEach((o,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = o;
+    btn.onclick = () => checkAnswer(i, btn);
+    opts.appendChild(btn);
+  });
+  const fb = document.getElementById('qFeedback');
+  fb.className = 'quiz-feedback';
+  fb.textContent = '';
+  document.getElementById('qNext').className = 'quiz-next-btn';
+  answered = false;
+}
+
+function checkAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+  const q = quizData[qIdx];
+  const allBtns = document.querySelectorAll('.quiz-opt');
+  allBtns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('qFeedback');
+  if (idx === q.a) {
+    btn.classList.add('correct');
+    fb.textContent = '✓ Правилно!';
+    fb.className = 'quiz-feedback show ok';
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    allBtns[q.a].classList.add('correct');
+    fb.textContent = `✗ Грешно. Правилният отговор е: „${q.opts[q.a]}"`;
+    fb.className = 'quiz-feedback show fail';
+  }
+  document.getElementById('qNext').className = 'quiz-next-btn show';
+}
+
+function nextQ() {
+  qIdx++;
+  if (qIdx >= quizData.length) {
+    document.getElementById('quizMain').style.display = 'none';
+    const sw = document.getElementById('quizScore');
+    sw.className = 'quiz-score-wrap show';
+    document.getElementById('scoreBig').textContent = `${score}/${quizData.length}`;
+    const pct = Math.round(score/quizData.length*100);
+    document.getElementById('scoreLabel').textContent =
+      pct >= 90 ? '🏆 Отличен резултат!' :
+      pct >= 70 ? '👍 Добре! Можеш и по-добре.' :
+      '📖 Прегледай материала отново.';
+    document.getElementById('qProgress').style.width = '100%';
+  } else {
+    renderQ();
+  }
+}
+
+function restartQuiz() {
+  qIdx = 0; score = 0;
+  document.getElementById('quizMain').style.display = '';
+  document.getElementById('quizScore').className = 'quiz-score-wrap';
+  renderQ();
+}
+
+// ── FLASHCARDS ──
+const flashCards = [
+  {t:'Катарзис', d:'Очистване на зрителя от страх и съжаление след гледане на трагедия (Аристотел).'},
+  {t:'Постоянен епитет', d:'Устойчив образен израз, свързан с определен герой в епоса: „бързоногият Ахил", „розовопръстата Зора".'},
+  {t:'Акростих', d:'Поетична форма, при която началните букви на редовете образуват дума или азбука. Пример: „Азбучна молитва".'},
+  {t:'Агиография', d:'Жанр – биографии на светци; включва описание на живота, чудесата и добродетелите им.'},
+  {t:'Полемично слово', d:'Текст, насочен срещу противник с контра-аргументи; вид апология. Пример: „За буквите".'},
+  {t:'Пародия', d:'Комично подражание на жанр или стил с цел осмиване. В „Дон Кихот" – пародия на рицарски романи.'},
+  {t:'Сонет', d:'14 стиха в 3 катрена + 1 куплет; рима abab cdcd efef gg. Изразява един основен образ или идея.'},
+  {t:'Страдателен залог', d:'Глаголна форма, при която подлогът е обект на действието: „Писмото беше написано." Образува се с „съм/бъда + мин. страд. причастие" или „се".'},
+  {t:'Свършен вид', d:'Действието е завършено, ограничено: „напиша", „дойда". Противопоставя се на несвършен вид.'},
+  {t:'Фразеологизъм', d:'Устойчиво словосъчетание с преносно значение, различно от буквалното: „хвърлям камък в чуждата градина" = вреди на някого.'},
+  {t:'Трагически герой', d:'Благороден герой с фатален недостатък (хибрис), унищожен от конфликт с неизбежна сила или съдба.'},
+  {t:'Новела', d:'Кратък прозаичен жанр с неочакван обрат; действието е концентрирано около едно събитие.'},
+  {t:'Кодификация', d:'Записване и фиксиране на езиковата норма в речници, граматики и правописни наръчници.'},
+  {t:'Епическо сравнение', d:'Разгърнато сравнение в епоса, което образува самостоятелна картина и забавя действието.'},
+  {t:'Символ', d:'Знак или образ с допълнително, по-дълбоко значение. В „Житие на Константин–Кирил" орелът символизира величие.'},
+];
+
+let fcIdx = 0;
+
+function renderCard() {
+  const c = flashCards[fcIdx];
+  document.getElementById('fcTerm').textContent = c.t;
+  document.getElementById('fcDef').textContent = c.d;
+  document.getElementById('fcCounter').textContent = `${fcIdx+1} / ${flashCards.length}`;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+
+function flipCard() { document.getElementById('flashcard').classList.toggle('flipped'); }
+function nextCard() { fcIdx = (fcIdx+1) % flashCards.length; renderCard(); }
+function prevCard() { fcIdx = (fcIdx - 1 + flashCards.length) % flashCards.length; renderCard(); }
+
+// ── INIT ──
+renderQ();
+renderCard();
+</script>
+</body>
+</html>
